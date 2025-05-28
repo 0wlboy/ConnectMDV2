@@ -4,6 +4,9 @@ import { Input } from "./ui/input.jsx";
 import { Button } from "./ui/button.jsx";
 import { Checkbox } from "./ui/checkbox.jsx";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import {Label, TextInput} from "flowbite-react";
+import axios from 'axios';
+import {useNavigate} from 'react-router-dom';
 
 
 const LoginForm = () => {
@@ -11,15 +14,26 @@ const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('Login attempted with:', { email, password, rememberMe });
-    // Handle login logic here
+    try {
+      const response = await axios.post('http://localhost:3001/api/users/login', {
+        email, 
+        password, 
+        //rememberMe
+      },{withCredentials: true});
+      setTimeout(() => navigate("/"), 3000);
+      console.log('Inicio de sesion exitoso: ', response.data)
+    }catch(error){
+      console.error('Error al iniciar sesion: ', error);
+    }
   };
 
   return (
@@ -29,21 +43,22 @@ const LoginForm = () => {
         <p className="text-gray-500 text-sm">Introduce tus credenciales para acceder</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-10">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Correo Electronico</label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <Mail className="h-4 w-4 text-gray-400" />
-            </div>
-            <Input 
+          <div className='mb-2 block'> 
+            <Label htmlFor='email4'>Tu correo electronico</Label>
+          </div>
+            <TextInput 
+              id="emial4" 
               type="email"
               value={email}
+              icon={Mail}
+              placeholder='Correo@gmail.com'
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Correo@gmail.com"
-              className="pl-10 pr-10 bg-blue-50 border-blue-100 focus:border-[#00bcd4] focus:ring-[#00bcd4] transition-all"
               required
+
             />
+
             <div className="absolute inset-y-0 right-0 flex items-center pr-3">
               <Button 
                 type="button" 
@@ -54,7 +69,6 @@ const LoginForm = () => {
                 <Eye className="h-4 w-4" />
               </Button>
             </div>
-          </div>
         </div>
 
         <div className="space-y-2">

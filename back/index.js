@@ -1,4 +1,5 @@
 import express, { json } from 'express'; //import express
+import session from 'express-session';
 import cors from "cors"; //import cors
 import './scheduler.js'
 import "./database/connection.js" //import connection to database
@@ -9,6 +10,8 @@ import appointmentRouter from "./routes/appointments.route.js" //import routes a
 import profileVisitRouter from "./routes/profileVisits.route.js" //import routes profileVisits
 import reviewRouter from "./routes/review.route.js" //import routes reviews
 import dotenv from 'dotenv';
+import MongoStore from 'connect-mongo'; //import MongoStore for session storage
+
 
 
 dotenv.config();
@@ -18,10 +21,8 @@ dotenv.config();
 const app = express(); // Create server with express
 const PORT = process.env.PORT || 3001;
 
-//const whiteList = ["http://localhost:3000","http://localhost:3001", "http://localhost:5173"];
-
 //cors config
-/*const allowedOrigins = ['http://localhost:5173','http://localhost:3001','http://localhost:3000']; // Reemplaza con el puerto/dominio de tu frontend
+const allowedOrigins = ['http://localhost:5173','http://localhost:3001','http://localhost:3000']; // Reemplaza con el puerto/dominio de tu frontend
  const corsOptions = {
    origin: function (origin, callback) {
      // Permite solicitudes sin 'origin' (como Postman o curl) o si el origen está en la lista blanca
@@ -36,12 +37,26 @@ const PORT = process.env.PORT || 3001;
    allowedHeaders: ['Content-Type', 'Authorization'], // Añade otros headers que tu app use
    credentials: true // Si necesitas enviar cookies o cabeceras de autorización
 };
- app.use(cors(corsOptions));*/
+ app.use(cors(corsOptions));
 
 
 app.use(json());// Middleware for JSON
 app.use('/api',[userRouter, contactRouter, feedbackRouter, appointmentRouter, profileVisitRouter, reviewRouter]);//routes
 
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URL, // Asegúrate de que esta variable de entorno esté configurada
+    collectionName: 'sessions', // Nombre de la colección donde se guardarán las sesiones
+    ttl: 2 * 60 * 60 // Tiempo de vida de la sesión en segundos (2 horas)
+  }),
+  cookie: { secure: false,
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 2 // 2 horas
+  } // Ajusta esto según tu entorno
+}));
 
 app.use((err, req, res, next) => {
   console.error("Error:", err.stack || err.message || err);

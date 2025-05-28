@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { generateToken } from "../middleware/auth.middleware.js";
 import multer from 'multer';
 import path  from 'path';
+import session from 'express-session';
 
 
 const storage = multer.diskStorage({
@@ -423,7 +424,7 @@ export const deleteUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
-
+  
   try {
     const user = await User.findOne({ email: RegExp(email, "i") });
     if (!user) {
@@ -457,7 +458,7 @@ export const loginUser = async (req, res) => {
         .status(401)
         .json({ message: "Credenciales inválidas: Usuario no encontrado." }); // O un mensaje más específico
     }
-
+    
     // Update login history and last login
     user.lastLogin = new Date();
     const ip =
@@ -470,10 +471,12 @@ export const loginUser = async (req, res) => {
       ip: ip || "IP desconocida",
     });
     // The pre-save middleware in user.model.js will handle totalLoginCount and historicalLogins capping
-
+   
     await user.save();
-
+    
     const accessToken = generateToken(user);
+    
+     console.log('login')
 
     res.status(200).json({
       message: "Bienvenido",

@@ -36,7 +36,8 @@ export const generateToken = (user) => {
  */
 export const isAuth = (req, res, next) => {
   const authorization = req.headers.authorization;
-  if (authorization) {
+  if (authorization && req.session && req.session.user) {
+    // If the user is already authenticated via session, skip token verification
     const token = authorization.slice(7, authorization.length);
     console.log(token, process.env.ACCESS_TOKEN_SECRET);
     jswebtoken.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decode) => {
@@ -74,7 +75,7 @@ export const authRole = (role) => (req, res, next) => {
         if (decode.role === role) {
           next();
         } else {
-          res.status(401).send({ message: `Invalid User, this is not ${role}` });
+          res.status(401).send({ message: `Usuario invalido. Debe ser ${role}` });
         }
       }
     });

@@ -133,7 +133,7 @@ const UserSchema = new Schema({
   },
   role: {
     type: String,
-    enum: ['cliente', 'prof', 'admin'],
+    enum: ['client', 'prof', 'admin'],
     required: [true, 'El rol es requerido.'],
   },
   profession: {
@@ -166,7 +166,7 @@ const UserSchema = new Schema({
   },
   strikes: {
     type: Number,
-    default: 3,
+    default: 0,
   },
   isSuspended: {
     type: Boolean,
