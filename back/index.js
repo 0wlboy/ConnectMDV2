@@ -1,5 +1,5 @@
 import express, { json } from 'express'; //import express
-import session from 'express-session';
+
 import cors from "cors"; //import cors
 import './scheduler.js'
 import "./database/connection.js" //import connection to database
@@ -42,21 +42,6 @@ const allowedOrigins = ['http://localhost:5173','http://localhost:3001','http://
 
 app.use(json());// Middleware for JSON
 app.use('/api',[userRouter, contactRouter, feedbackRouter, appointmentRouter, profileVisitRouter, reviewRouter]);//routes
-
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret-key',
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGO_URL, // Asegúrate de que esta variable de entorno esté configurada
-    collectionName: 'sessions', // Nombre de la colección donde se guardarán las sesiones
-    ttl: 2 * 60 * 60 // Tiempo de vida de la sesión en segundos (2 horas)
-  }),
-  cookie: { secure: false,
-    httpOnly: true,
-    maxAge: 1000 * 60 * 60 * 2 // 2 horas
-  } // Ajusta esto según tu entorno
-}));
 
 app.use((err, req, res, next) => {
   console.error("Error:", err.stack || err.message || err);

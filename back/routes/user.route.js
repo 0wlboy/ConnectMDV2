@@ -89,4 +89,13 @@ userRouter.patch("/users/delete/:id", isAuth, authRole("admin"), deleteUser);
  */
 userRouter.post("/users/login", loginUser);
 
+userRouter.get('/users/check-auth',isAuth, (req, res) => {
+    // Si el usuario está autenticado, devolver información del usuario
+    res.status(200).json({
+      isAuthenticated: true,
+      userRole: req.user.role,
+      userId: req.user._id
+    });
+})
+
 export default userRouter;

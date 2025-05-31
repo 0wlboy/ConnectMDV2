@@ -5,8 +5,8 @@ import { Button } from "./ui/button.jsx";
 import { Checkbox } from "./ui/checkbox.jsx";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import {Label, TextInput} from "flowbite-react";
-import axios from 'axios';
 import {useNavigate} from 'react-router-dom';
+import {useAuth} from './context/AuthContext.js'; // Importar el contexto de autenticación
 
 
 const LoginForm = () => {
@@ -15,6 +15,8 @@ const LoginForm = () => {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
+  const {login} = useAuth();
+
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -24,13 +26,10 @@ const LoginForm = () => {
     e.preventDefault();
     console.log('Login attempted with:', { email, password, rememberMe });
     try {
-      const response = await axios.post('http://localhost:3001/api/users/login', {
-        email, 
-        password, 
-        //rememberMe
-      },{withCredentials: true});
-      setTimeout(() => navigate("/"), 3000);
-      console.log('Inicio de sesion exitoso: ', response.data)
+      await login(email, password);
+      // La navegación debe ocurrir solo después de un inicio de sesión exitoso.
+      //  Podrías agregar un mensaje de éxito aquí antes de la navegación si lo deseas.
+      navigate("/"); 
     }catch(error){
       console.error('Error al iniciar sesion: ', error);
     }
