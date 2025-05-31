@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async (email, password) => {
+ const login = async (email, password) => {
     try {
       const response = await axios.post('http://localhost:3001/api/users/login', { email, password }, { withCredentials: true });
       if (response.data.accessToken) {
@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = async () => {
+   const logout = async () => {
     try {
       await axios.post('http://localhost:3001/api/users/logout', {}, { withCredentials: true });
       setIsAuthenticated(false);
