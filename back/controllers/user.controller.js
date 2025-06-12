@@ -1,33 +1,102 @@
 import User from "../models/user.model.js";
 import mongoose from "mongoose";
 import { generateToken } from "../middleware/auth.middleware.js";
-import multer from 'multer';
-import path  from 'path';
-import session from 'express-session';
-
+import nodemailer from "nodemailer";
+import path from "path";
+import session from "express-session";
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, process.env.UPLOAD_PATH || 'uploads/users');
+    cb(null, process.env.UPLOAD_PATH || "uploads/users");
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-    cb(null, file.fieldname + '-' + uniqueSuffix)
-  }
-})
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, file.fieldname + "-" + uniqueSuffix);
+  },
+});
 
+/**
+ * @async
+ * @function upload
+ * @description Middleware for handling file uploads using Multer. Configured to store files in the specified UPLOAD_PATH and filter for image files.
+ * @param {Object} req - HTTP request object.
+ * @param {Object} res - HTTP response object.
+ */
 export const upload = multer({
   storage: storage,
   fileFilter: (req, file, cb) => {
     // Ejemplo de filtro de tipo de archivo (permitir solo imágenes)
-    if (file.mimetype.startsWith('image/')) {
+    if (file.mimetype.startsWith("image/")) {
       cb(null, true);
     } else {
-      cb(new Error('Solo se permiten archivos de imagen!'), false);
+      cb(new Error("Solo se permiten archivos de imagen!"), false);
     }
   },
-  limits: { fileSize: 1024 * 1024 * 5 } // Límite de 5MB por archivo
+  limits: { fileSize: 1024 * 1024 * 5 }, // Límite de 5MB por archivo
 });
+
+/**
+ * @async
+ * @function sendEmail
+ * @description Sends an email using the configured nodemailer transporter.
+ * @param {Object} req - HTTP request object.
+ * @param {Object} res - HTTP response object.
+ */
+function sendEmail({ recipient_email, OTP }) {
+  return new Promise((resolve, reject) => {
+    var transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.MY_EMAIL,
+        pass: process.env.MY_PASSWORD,
+      },
+    });
+
+    const mail_configs = {
+      from: process.env.MY_EMAIL,
+      to: recipient_email,
+      subject: "KODING 101 PASSWORD RECOVERY",
+      html: `<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>CodePen - OTP Email Template</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
+  <div style="margin:50px auto;width:70%;padding:20px 0">
+    <div style="border-bottom:1px solid #eee">
+      <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Koding 101</a>
+    </div>
+    <p style="font-size:1.1em">Hi,</p>
+    <p>Thank you for choosing Koding 101. Use the following OTP to complete your Password Recovery Procedure. OTP is valid for 5 minutes</p>
+    <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${OTP}</h2>
+    <p style="font-size:0.9em;">Regards,<br />Koding 101</p>
+    <hr style="border:none;border-top:1px solid #eee" />
+    <div style="float:right;padding:8px 0;color:#aaa;font-size:0.8em;line-height:1;font-weight:300">
+      <p>Koding 101 Inc</p>
+      <p>1600 Amphitheatre Parkway</p>
+      <p>California</p>
+    </div>
+  </div>
+</div>
+<!-- partial -->
+  
+</body>
+</html>`,
+    };
+    transporter.sendMail(mail_configs, function (error, info) {
+      if (error) {
+        console.log(error);
+        return reject({ message: `An error has occured` });
+      }
+      return resolve({ message: "Email sent succesfuly" });
+    });
+  });
+}
 
 /**
  * @module UserController
@@ -53,19 +122,13 @@ export const upload = multer({
  * @example POST http://localhost:3001/users/register
  */
 export const createUser = async (req, res) => {
-  const {
-    firstName,
-    lastName,
-    email,
-    password,
-    role,    
-    locations,
-    profession,
-  } = req.body;
+  const { firstName, lastName, email, password, role, locations, profession } =
+    req.body;
 
   // Obtener rutas de archivos de req.files (poblado por multer)
   const profilePicturePath = req.files?.profilePicture?.[0]?.path;
-  const officePicturesPaths = req.files?.officePictures?.map(file => file.path) || [];
+  const officePicturesPaths =
+    req.files?.officePictures?.map((file) => file.path) || [];
 
   try {
     const user = new User({
@@ -424,7 +487,7 @@ export const deleteUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
-  
+
   try {
     const user = await User.findOne({ email: RegExp(email, "i") });
     if (!user) {
@@ -458,7 +521,7 @@ export const loginUser = async (req, res) => {
         .status(401)
         .json({ message: "Credenciales inválidas: Usuario no encontrado." }); // O un mensaje más específico
     }
-    
+
     // Update login history and last login
     user.lastLogin = new Date();
     const ip =
@@ -471,12 +534,12 @@ export const loginUser = async (req, res) => {
       ip: ip || "IP desconocida",
     });
     // The pre-save middleware in user.model.js will handle totalLoginCount and historicalLogins capping
-   
+
     await user.save();
-    
+
     const accessToken = generateToken(user);
-    
-     console.log('login')
+
+    console.log("login");
 
     res.status(200).json({
       message: "Bienvenido",
@@ -518,7 +581,21 @@ export const checkAuth = async (req, res) => {
   } catch (error) {
     res.status(401).json({ message: "Token no válido o expirado." });
   }
-}
+};
+
+/**
+ * @async
+ * @function sendEmail
+ * @description Sends an email using the configured nodemailer transporter.
+ * @param {Object} req - HTTP request object.
+ * @param {Object} res - HTTP response object.
+ * @returns {string} message
+ */
+export const sendEmail = async (req, res) => {
+  sendEmail(req.body)
+    .then((response) => res.send(response.message))
+    .catch((error) => res.status(500).send(error.message));
+};
 
 /**
  * @async
@@ -528,8 +605,7 @@ export const checkAuth = async (req, res) => {
  * @param {Object} res - HTTP response object.
  * @returns {string} message
  */
-export const logOut = async (req, res) =>{
-  console.log('cierre de sesion');
+export const logOut = async (req, res) => {
+  console.log("cierre de sesion");
   res.status(200).json({ message: "Sesión cerrada con éxito" });
-
-}
+};

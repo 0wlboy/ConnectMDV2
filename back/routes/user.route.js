@@ -10,6 +10,7 @@ import {
   logOut,
   checkAuth,
   upload,
+  emailRecovery,
 } from "../controllers/user.controller.js";
 import { isAuth, authRole } from "../middleware/auth.middleware.js"; // Asegúrate que la ruta es correcta
 
@@ -108,5 +109,15 @@ userRouter.get("/users/check-auth", isAuth, checkAuth);
  * @example POST http://localhost:3001/users/logout
  */
 userRouter.post("/users/logout", logOut)
+
+/**
+ * @route GET /users/send_recovery_email
+ * @description Sends a recovery email to the user.
+ * @access Public
+ * @returns {string} message
+ * @example GET http://localhost:3001/users/send_recovery_email
+ *
+ */
+userRouter.get("/users/send_recovery_email", emailRecovery);
 
 export default userRouter;

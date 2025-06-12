@@ -6,8 +6,12 @@ import {
   RegisterProf,
   RoleSelection,
   Map,
-  RecoverPassword
+  RecoverPassword,
+  PasswordReset,
+  SendEmail,
 } from "./pages/pages.jsx";
+
+
 
 function App() {
   const { isAuthenticated, userRole } = useAuth();
@@ -24,6 +28,8 @@ function App() {
             <Route path="/recoverPassword" element={<RecoverPassword />} />
             <Route path="/registerClient" element={<RegisterClient />} />
             <Route path="/registerProf" element={<RegisterProf />} />
+            <Route path="/sendEmail" element={<SendEmail />} />
+            <Route path="/passwordReset" element={<PasswordReset />} />
           </>
         )}
         {/* Rutas protegidas */}
