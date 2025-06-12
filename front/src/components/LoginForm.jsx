@@ -6,7 +6,7 @@ import { Checkbox } from "./ui/checkbox.jsx";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import {Label, TextInput} from "flowbite-react";
 import {useNavigate} from 'react-router-dom';
-import {useAuth} from './context/AuthContext.js'; // Importar el contexto de autenticación
+import {useAuth} from './../components/context/AuthContext'; // Importar el contexto de autenticación
 
 
 const LoginForm = () => {
@@ -73,7 +73,7 @@ const LoginForm = () => {
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <label className="text-sm font-medium text-gray-700">Contraseña</label>
-            <a href="#" className="text-xs text-[#00bcd4] hover:underline">¿Olvidaste tu contraseña?</a>
+            <a href="/recoverPassword" className="text-xs text-[#00bcd4] hover:underline">¿Olvidaste tu contraseña?</a>
           </div>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">

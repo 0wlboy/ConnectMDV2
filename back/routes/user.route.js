@@ -7,7 +7,9 @@ import {
   updateUser,
   deleteUser,
   loginUser,
-  upload
+  logOut,
+  checkAuth,
+  upload,
 } from "../controllers/user.controller.js";
 import { isAuth, authRole } from "../middleware/auth.middleware.js"; // Asegúrate que la ruta es correcta
 
@@ -28,8 +30,8 @@ const userRouter = express.Router();
 userRouter.post(
   "/users/register",
   upload.fields([
-    { name: 'profilePicture', maxCount: 1 },
-    { name: 'officePictures', maxCount: 5 } // Ajusta maxCount según necesites
+    { name: "profilePicture", maxCount: 1 },
+    { name: "officePictures", maxCount: 5 }, // Ajusta maxCount según necesites
   ]),
   createUser
 );
@@ -89,13 +91,22 @@ userRouter.patch("/users/delete/:id", isAuth, authRole("admin"), deleteUser);
  */
 userRouter.post("/users/login", loginUser);
 
-userRouter.get('/users/check-auth',isAuth, (req, res) => {
-    // Si el usuario está autenticado, devolver información del usuario
-    res.status(200).json({
-      isAuthenticated: true,
-      userRole: req.user.role,
-      userId: req.user._id
-    });
-})
+/**
+ * @route GET /users/check-auth
+ * @description Checks if the user is authenticated.
+ * @access Private
+ * @returns {Object} JSON response with `isAuthenticated` boolean and `userRole` if authenticated, or an error message if not.
+ * @example GET http://localhost:3001/users/check-auth
+ */
+userRouter.get("/users/check-auth", isAuth, checkAuth);
+
+/**
+ * @route POST /users/logout
+ * @description Logs out the user.
+ * @access Public
+ * @returns {string} message
+ * @example POST http://localhost:3001/users/logout
+ */
+userRouter.post("/users/logout", logOut)
 
 export default userRouter;

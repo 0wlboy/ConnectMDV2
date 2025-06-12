@@ -1,4 +1,5 @@
-import {useAuth} from '../context/AuthContext';
+import {useAuth} from '../components/context/AuthContext';
+import  SideBar  from './../components/ui/SideBar';
 
 const Map = () => {
 const { isAuthenticated, userRole } = useAuth();
@@ -10,8 +11,11 @@ return(
   ) : (
     <p>No estás autenticado</p>
   )}
+  <h1>este es otro texto</h1>
+  <SideBar></SideBar>
   </>
 )
+
 }
 
 export default Map;

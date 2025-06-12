@@ -490,3 +490,46 @@ export const loginUser = async (req, res) => {
       .json({ message: "Error al ingresar el usuario", error: error.message });
   }
 };
+
+/**
+ * @async
+ * @function checkAuth
+ * @description Checks if the user is authenticated by verifying the JWT from the request headers.
+ * @param {Object} req - HTTP request object.
+ * @param {Object} res - HTTP response object.
+ * @returns {Object} JSON response with `isAuthenticated` boolean and `userRole` if authenticated, or an error message if not.
+ * @example GET http://localhost:3001/users/check-auth
+ */
+export const checkAuth = async (req, res) => {
+  // Si el usuario está autenticado, devolver información del usuario
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "No se proporcionó token." });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Si el token es válido, responder con la información de autenticación
+    res.status(200).json({
+      isAuthenticated: true,
+      userRole: decoded.role, // Asegúrate de que el rol del usuario esté en el token
+    });
+  } catch (error) {
+    res.status(401).json({ message: "Token no válido o expirado." });
+  }
+}
+
+/**
+ * @async
+ * @function logOut
+ * @description Logs out the user.
+ * @param {Object} req - HTTP request object.
+ * @param {Object} res - HTTP response object.
+ * @returns {string} message
+ */
+export const logOut = async (req, res) =>{
+  console.log('cierre de sesion');
+  res.status(200).json({ message: "Sesión cerrada con éxito" });
+
+}

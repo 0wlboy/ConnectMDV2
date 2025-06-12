@@ -1,4 +1,4 @@
-// AuthContext.js
+// AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -43,6 +43,7 @@ export const AuthProvider = ({ children }) => {
       await axios.post('http://localhost:3001/api/users/logout', {}, { withCredentials: true });
       setIsAuthenticated(false);
       setUserRole(null);
+      console.log('Cierre de sesión exitoso');
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }
